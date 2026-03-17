@@ -238,26 +238,29 @@ public class BookTravelPlugin
 agent_retrieve = AssistantAgent(
     name="dataretrieval",
     model_client=model_client,
-    tools=[retrieve_tool],
+    tools=[retrieve_tool],  # 该代理只负责调用检索工具拿数据
     system_message="Use tools to solve tasks."
 )
 
 agent_analyze = AssistantAgent(
     name="dataanalysis",
     model_client=model_client,
-    tools=[analyze_tool],
+    tools=[analyze_tool],  # 该代理只负责调用分析工具处理数据
     system_message="Use tools to solve tasks."
 )
 
 # 当用户说“APPROVE”时对话结束
 termination = TextMentionTermination("APPROVE")
 
+# 用户代理：需要人工确认或补充信息时，会通过 input_func=input 向终端读取输入
 user_proxy = UserProxyAgent("user_proxy", input_func=input)
 
+# 轮询群聊：按顺序让各代理发言（检索 -> 分析 -> 用户），并使用 termination 作为终止条件
 team = RoundRobinGroupChat([agent_retrieve, agent_analyze, user_proxy], termination_condition=termination)
 
+# 以流式方式运行任务，最多 10 轮对话
 stream = team.run_stream(task="Analyze data", max_turns=10)
-# 在脚本中运行时使用 asyncio.run(...)。
+# 将流式结果实时输出到控制台；在脚本中运行时通常放在 asyncio.run(...) 的异步上下文中
 await Console(stream)
 ```
 
