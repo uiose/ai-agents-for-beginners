@@ -19,13 +19,13 @@ import json
 import os
 from datetime import datetime
 from typing import cast, Any
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from openai import OpenAI
 
 # ============================================================================
 # 第0步：加载环境变量
 # ============================================================================
-load_dotenv()
+load_dotenv(find_dotenv())
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
